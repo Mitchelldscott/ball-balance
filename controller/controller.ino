@@ -5,9 +5,18 @@
 #define P3 A2								// Orange 
 #define P4 A3								// Yellow 
 
+#define S1 11
+#define V1 12
+#define G1 13
+
 // Estimated State
 float X;
 float Y;
+
+float targetX;
+float targetY;
+
+float uX;
 
 // State histroy object
 FIFO_Queue_2D queue(50);
@@ -60,9 +69,12 @@ void dumpState()
 		Serial.print(Y3); Serial.print("\t");
 		Serial.print(Y4); Serial.print("\t");
 		Serial.println(float(noiseY)/2048.0);
+    //queue.print();
+    Serial.println("Control signal");
+    Serial.println(uX);
+    Serial.println("---");
+
 	}
-  //queue.print();
-  Serial.println("---");
 	
 }
 
@@ -117,11 +129,28 @@ void updateState()
 	is_contact = (Y <= 100 && Y >= -100) && (X <= 100 && X >= -100);
 }
 
+void setServo(float signal, int pin)
+{
+  int u = int(signal * 200) + 55;
+  analogWrite(pin, u);
+}
+
 void setup()
 {
 	Serial.begin(9600);
 	t = millis();
 	t1 = t;
+
+  pinMode(G1, INPUT);
+  pinMode(V1, OUTPUT);
+
+  digitalWrite(V1, HIGH);
+  digitalWrite(G1, LOW);
+
+  pinMode(S1, OUTPUT);
+
+  targetX = 0.0;
+  targetY = 0.0;
 }
 
 void loop()
@@ -129,10 +158,17 @@ void loop()
 	interval(&t1, dumprate, &dumpState);
 	updateState();
   if (is_contact)
+  {
     queue.insert(X, Y);
+
+    uX = ((targetX - X) + 1) / 2; // * controller;
+    // float uY = (targetY - Y);
+    setServo(uX, S1);
+  }
+  
 	delay(100);
-	
 }
+
 
 
 
