@@ -2,7 +2,7 @@
 echo -e "updating and installing dependencies"
 sudo apt update
 
-sudo xargs apt install -y --no-install-recommends dependencies.txt
+#sudo xargs apt install -y --no-install-recommends dependencies.txt
 
 
 echo -e "installing pip and python requirements"
