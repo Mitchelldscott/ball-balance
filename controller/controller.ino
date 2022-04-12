@@ -18,8 +18,11 @@ float targetY;
 
 float uX;
 
-// State histroy object
-FIFO_Queue_2D queue(50);
+// Setup variables for timing handler
+unsigned long t;
+unsigned long t1;
+unsigned long dumprate = 1000;
+
 
 // Measured values (for each pin)
 int X1;
@@ -37,12 +40,10 @@ int noiseX;
 int noiseY;
 int noise_tolerance = 20;
 
-// Setup variables for timing handler
-unsigned long t;
-unsigned long t1;
-unsigned long dumprate = 100;
-
 bool is_contact = false;
+
+// State histroy object
+FIFO_Queue_2D queue(50);
 
 void dumpState()
 {
@@ -52,29 +53,29 @@ void dumpState()
 	* Meant for debug only
 	*/
 
-	if (is_contact)
-	{
-		Serial.println("Axis\tPosition\tMeasurements\t\t\tNoise"); 
-		Serial.print("X:\t\t");
-		Serial.print(X); Serial.print("\t\t"); 
-		Serial.print(X1); Serial.print("\t");
-		Serial.print(X2); Serial.print("\t");
-		Serial.print(X3); Serial.print("\t");
-		Serial.print(X4); Serial.print("\t");
-		Serial.println(float(noiseX)/2048.0);
-		Serial.print("Y:\t\t");
-		Serial.print(Y); Serial.print("\t\t");
-		Serial.print(Y1); Serial.print("\t");
-		Serial.print(Y2); Serial.print("\t");
-		Serial.print(Y3); Serial.print("\t");
-		Serial.print(Y4); Serial.print("\t");
-		Serial.println(float(noiseY)/2048.0);
-    //queue.print();
-    Serial.println("Control signal");
-    Serial.println(uX);
-    Serial.println("---");
+	Serial.println("Axis\tPosition\tMeasurements\t\t\tNoise"); 
+	Serial.print("X:\t");
+	Serial.print(X); Serial.print("\t\t"); 
+	Serial.print(X1); Serial.print("\t");
+	Serial.print(X2); Serial.print("\t");
+	Serial.print(X3); Serial.print("\t");
+	Serial.print(X4); Serial.print("\t");
+	Serial.println(float(noiseX)/2048.0);
+	Serial.print("Y:\t");
+	Serial.print(Y); Serial.print("\t\t");
+	Serial.print(Y1); Serial.print("\t");
+	Serial.print(Y2); Serial.print("\t");
+	Serial.print(Y3); Serial.print("\t");
+	Serial.print(Y4); Serial.print("\t");
+	Serial.println(float(noiseY)/2048.0);
 
-	}
+	// queue.print();
+
+	Serial.println("Control signal");
+	Serial.println(uX);
+
+  Serial.println("---");
+
 	
 }
 
@@ -119,6 +120,8 @@ void updateState()
   if (c < 0)
     c *= 2.2;
 	X = float(c / 400.0) * 100.0;
+	if (X > 100 || X < -100)
+		X = 101;
   delay(1);
 	// Update Y
 	setPins(P3, P4, P1, P2);
@@ -160,8 +163,10 @@ void loop()
   if (is_contact)
   {
     queue.insert(X, Y);
+    X = queue.get_averageX();
+    Y = queue.get_averageY();
 
-    uX = ((targetX - X) + 1) / 2; // * controller;
+    uX = (((targetX - X) / 100) + 1) / 2; // * controller;
     // float uY = (targetY - Y);
     setServo(uX, S1);
   }

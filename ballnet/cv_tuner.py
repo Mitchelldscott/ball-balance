@@ -7,15 +7,6 @@ import busio
 import numpy as np
 import adafruit_pca9685
 
-def init_servohat(freq):
-	i2c = busio.I2C(board.SCL, board.SDA)
-	pca = adafruit_pca9685.PCA9685(i2c)
-	pca.frequency = freq
-
-	motorX = pca.channels[0]
-	motorY = pca.channels[1]
-	return pca, motorX, motorY
-
 def init_camera():
 
 	cap = cv2.VideoCapture(0)
@@ -30,7 +21,6 @@ def init_camera():
 		exit()
 
 	return cap, width, height
-
 
 def detect(image, width, height):
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -49,38 +39,20 @@ def detect(image, width, height):
 
 	return ball, image
 
-pca, motorX, motorY = init_servohat(60)
-cap, w, h = init_camera()
-motorY.duty_cycle = 4500
+def main():
+	cap, w, h = init_camera()
+	while True:
+		ret, frame = cap.read()
+		if not ret:
+			print("cap.read() retured False: Exiting ...")
+			exit(0)
 
-target = np.array([0.5, 0.5])
-u = target
+		ball, frame = detect(frame, w, h)
+		cv2.imshow('frame', frame)
+		if cv2.waitKey(1) == ord('q'):
+			break
 
-Kp = 0.25
 
-while True:
-	t = time.time()
-	ret, frame = cap.read()
-	if not ret:
-		print("cap.read() retured False: Exiting ...")
-		exit(0)
 
-	ball, frame = detect(frame, w, h)
-	capture_t = time.time() - t
-
-	err = (target - ball) * Kp
-	u = (err * 3000) + 4500 #* controller 
-
-	print(f'ErrorX: {err[0]}, SignalX: {u[0]}')
-	motorX.duty_cycle = int(u[0])
-
-	processing_time = time.time() - capture_t - t
-
-	cv2.imshow('frame', frame)
-	if cv2.waitKey(1) == ord('q'):
-		break
-	print(f'Loop time: {np.round(time.time() - t, 4)}, {np.round(capture_t, 4)}, {np.round(processing_time, 4)}')
-		
-# When everything done, release the capture
-cap.release()
-cv2.destroyAllWindows()
+if __name__ == '__main__':
+	main()

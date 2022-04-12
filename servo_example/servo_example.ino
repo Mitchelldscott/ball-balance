@@ -25,7 +25,7 @@ void loop() {
   signal = int(((cos(t) + 1) / 2) * 200) + 55;
   analogWrite(S1, signal);
   
-  t += 0.01;
+  t += 0.05;
 
   if (t > 6.26)
     t -= 6.26;

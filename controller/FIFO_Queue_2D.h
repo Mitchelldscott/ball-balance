@@ -12,6 +12,8 @@ class FIFO_Queue_2D
   public:
     FIFO_Queue_2D();
     FIFO_Queue_2D(int size);
+    float get_averageX();
+    float get_averageY();
     void insert(float, float);
     float* get(int);
     void print();
@@ -36,6 +38,16 @@ FIFO_Queue_2D::FIFO_Queue_2D(int s)
 
   averageX = 0.0;
   averageY = 0.0;
+}
+
+float FIFO_Queue_2D::get_averageX()
+{
+  return averageX;
+}
+
+float FIFO_Queue_2D::get_averageY()
+{
+  return averageY;
 }
 
 void FIFO_Queue_2D::insert(float x, float y)
