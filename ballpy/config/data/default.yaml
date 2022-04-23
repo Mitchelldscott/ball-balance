@@ -1,0 +1,11 @@
+CAMERA:
+  DEBUG: True
+  FPS: 30
+  CROP: 
+    - [0, 300]
+    - [0, 300]
+
+SERVO_DRIVER:
+  PINS:
+    - 0
+    - 8
