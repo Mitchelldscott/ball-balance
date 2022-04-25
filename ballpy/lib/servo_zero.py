@@ -14,8 +14,9 @@ def init_servohat(freq):
 	pca = adafruit_pca9685.PCA9685(i2c)
 	pca.frequency = 60
 
-	motorX = pca.channels[0]
-	motorY = pca.channels[1]
+	motorX = pca.channels[8]
+	motorY = pca.channels[0]
+	pca.channels[8].duty_cycle = 4500
 	return pca, motorX, motorY
 
 def spin(step):
@@ -33,13 +34,15 @@ def spin(step):
 		motorX.duty_cycle = int(signal)
 		motorY.duty_cycle = int(signal)
 		t += step
-		time.sleep(0.1)
+		time.sleep(0.05)
 
 def set(value):
 	pca, motorX, motorY = init_servohat(60)
 
 	motorX.duty_cycle = int(value)
 	motorY.duty_cycle = int(value)
+	while True:
+		time.sleep(1)
 
 
 def main(args):
